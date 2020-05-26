@@ -261,6 +261,7 @@ public class Board extends JPanel
 		    	        	        		if(tmpobj.Harndrang>450)
 		    	        	        		{
 		    	        	        			besetztGrid[tmpobj.posX/32][tmpobj.posY/32]=1;
+		    	        	        			tmpobj.direction=2;
 		    	        	        			tmpobj.Harndrang=-20;
 		    	        	        			tmpobj.Laune+=100;
 		    	        	        		}
@@ -271,11 +272,6 @@ public class Board extends JPanel
 			    	        	        			{
 		    	        	        				besetztGrid[tmpobj.posX/32][tmpobj.posY/32]=1;
 			    	        	        			tmpobj.status++;
-			    	        	        			//Richtung Stuhl ausrichten
-			    	        	        			if(blockGrid[tmpobj.posX/32][tmpobj.posY/32]==7) tmpobj.direction=2;
-			    	        	        			if(blockGrid[tmpobj.posX/32][tmpobj.posY/32]==8) tmpobj.direction=3;
-			    	        	        			if(blockGrid[tmpobj.posX/32][tmpobj.posY/32]==9) tmpobj.direction=0;
-			    	        	        			if(blockGrid[tmpobj.posX/32][tmpobj.posY/32]==10) tmpobj.direction=1;
 			    	        	        			System.out.println("[---Ende----- Platz genommen auf : " +ix+ "," +iy+  "]");
 			    	        	        			}
 
@@ -369,6 +365,7 @@ public class Board extends JPanel
 				    	        	            	            if(tmpobj4.status==201)
 				    	        	            	            {
 				    	        	            	            	tmpobj4.status=202;
+				    	        	            	            	bestellungAbgegeben--;
 				    	        	            	            	break;
 				    	        	            	            }
 				    	        	            	        }
@@ -629,7 +626,7 @@ public class Board extends JPanel
     goright.setLocation(105,395-150);       
     menubarRight.add(goright);
     
-    selectBlock = new JButton("Select Block (Q)");
+    selectBlock = new JButton("Einrichtung auswaehlen (Q)");
     selectBlock.setSize(150,25);
     selectBlock.setBackground(Maincolor);
     selectBlock.setForeground(Color.WHITE);
@@ -638,7 +635,7 @@ public class Board extends JPanel
     selectBlock.setLocation(5,495);       
     menubarRight.add(selectBlock);
     
-    buildBlock = new JButton("Build Block (E)");
+    buildBlock = new JButton("Einrichtung kaufen (E)");
     buildBlock.setSize(150,25);
     buildBlock.setBackground(Maincolor);
     buildBlock.setForeground(Color.WHITE);
@@ -781,7 +778,7 @@ public class Board extends JPanel
 	        //St�hle
 	    	//blockGrid[minX+7][maxY-9]=7;
 	    	blockGrid[minX+7][maxY-6]=7;
-	    	blockGrid[8][10]=8;
+	    	blockGrid[6][10]=10;
 
     	blockGrid[5][14]=9;
     	
@@ -894,7 +891,8 @@ public class Board extends JPanel
     	    	        	if(treffer==0) 
     	    	        		{
     	    	        			lPerson.remove(iPerson);
-    	    	        			schlange++;
+    	    	        			if(schlange<15) schlange++;
+    	    	        			 System.out.println("[Schlange erhoeht  auf" +schlange+ " ]");
     	    	        		}
     	    	        	else
     	    	        	 if(schlange>0) schlange--;
@@ -1052,10 +1050,17 @@ public class Board extends JPanel
         
         switchGast.addActionListener(new ActionListener() {
     		public void actionPerformed(ActionEvent e) {
+    			
     			if((gastzaehler+1)<lPerson.size()) gastzaehler++; else gastzaehler=0;
     			personKlasse tmpobj = lPerson.get(gastzaehler);
-
-    				guestBar.setText("<html> #" +(tmpobj.nr+1)+ " (" +showType(tmpobj)+ ") " +tmpobj.vorname+ " " +tmpobj.nachname+ "<br>Status : (" +tmpobj.status+ ") " +showStats(tmpobj)+ "<br>Laune:" +tmpobj.Laune+ "<br> Ziel:" +tmpobj.zielX+ "," +tmpobj.zielY+ "<br>Pos:" +tmpobj.posX+ "," +tmpobj.posY+ "<br>Home:" +tmpobj.homeX+ "," +tmpobj.homeY+ "<br>Harndrang: " +tmpobj.Harndrang+ "</html>" );
+    			while(tmpobj.status==1000 || tmpobj.status==1001)
+				{
+    				System.out.println("[Gast switcher sucht Person ohne Status 1000 und 1001]");
+    				if((gastzaehler+1)<lPerson.size()) gastzaehler++; else gastzaehler=0;
+    				tmpobj= lPerson.get(gastzaehler);
+				};
+    						guestBar.setText("<html> #" +(tmpobj.nr+1)+ " (" +showType(tmpobj)+ ") " +tmpobj.vorname+ " " +tmpobj.nachname+ "<br>Status : (" +tmpobj.status+ ") " +showStats(tmpobj)+ "<br>Laune:" +tmpobj.Laune+ "<br> Ziel:" +tmpobj.zielX+ "," +tmpobj.zielY+ "<br>Pos:" +tmpobj.posX+ "," +tmpobj.posY+ "<br>Home:" +tmpobj.homeX+ "," +tmpobj.homeY+ "<br>Harndrang: " +tmpobj.Harndrang+ "</html>" );
+    			
 
     		}
         });
@@ -1159,27 +1164,22 @@ public class Board extends JPanel
         		        lTisch.remove(tischzaehler-1);
         		        tischzaehler--;
         		        }
-    					if(blockSelector==3)
-    						{
-    							tischHinzufuegen(x/32,y/32,tischzaehler);
-    							blockGrid[(x/32)][(y/32)]=blockSelector;
-    						} else blockGrid[(x/32)][(y/32)]=blockSelector;
-    				}
+    				
     				switch(blockSelector)
     				{
     				case 1: break;//Löschen
-    				case 2: finanzen-=120;tmpWert=-120;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y;break;//Herd
-    				case 3:	finanzen-=50;tmpWert=-50;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y;break;//Tisch
-    				case 4:	finanzen-=70;tmpWert=-70;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;break;//Waschbecken
-    				case 5:	finanzen-=25;tmpWert=-25;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;break;//Kasse
-    				case 6:	finanzen-=75;tmpWert=-75;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;break;//Toilette
-    				case 7:	finanzen-=20;tmpWert=-20;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;break;//Stuhl
-    				case 8:	finanzen-=20;tmpWert=-20;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;break;//Stuhl
-    				case 9:	finanzen-=20;tmpWert=-20;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;break;//Stuhl
-    				case 10:	finanzen-=20;tmpWert=-20;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;break;//Stuhl
+    				case 2: if(finanzen>120) {blockGrid[(x/32)][(y/32)]=blockSelector;finanzen-=120;tmpWert=-120;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y;}break;//Herd
+    				case 3:	if(finanzen>50) {tischHinzufuegen(x/32,y/32,tischzaehler);blockGrid[(x/32)][(y/32)]=blockSelector;finanzen-=50;tmpWert=-50;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y;}break;//Tisch
+    				case 4:	if(finanzen>70) {blockGrid[(x/32)][(y/32)]=blockSelector;finanzen-=70;tmpWert=-70;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;}break;//Waschbecken
+    				case 5:	if(finanzen>25) {blockGrid[(x/32)][(y/32)]=blockSelector;finanzen-=25;tmpWert=-25;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;}break;//Kasse
+    				case 6:	if(finanzen>75) {blockGrid[(x/32)][(y/32)]=blockSelector;finanzen-=75;tmpWert=-75;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;}break;//Toilette
+    				case 7:	if(finanzen>20) {blockGrid[(x/32)][(y/32)]=blockSelector;finanzen-=20;tmpWert=-20;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;}break;//Stuhl
+    				case 8:	if(finanzen>20) {blockGrid[(x/32)][(y/32)]=blockSelector;finanzen-=20;tmpWert=-20;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;}break;//Stuhl
+    				case 9:	if(finanzen>20) {blockGrid[(x/32)][(y/32)]=blockSelector;finanzen-=20;tmpWert=-20;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;}break;//Stuhl
+    				case 10:	if(finanzen>20) {blockGrid[(x/32)][(y/32)]=blockSelector;finanzen-=20;tmpWert=-20;tmpTimer=time+tmpTimerDauer;tmpTimerPosX=x;tmpTimerPosY=y*32;}break;//Stuhl
 	            	
     				}
-    							
+    				}			
     				
   
       		}
@@ -1540,8 +1540,8 @@ public class Board extends JPanel
             		{
             			essenZubereitet++;
             			tmpobj.Zubereitung=0;
-	        			bestellungAbgegeben--;
-	        			if(bestellungAbgegeben>0) tmpobj.status=202; else tmpobj.status=201;
+	        			
+	        			if(bestellungAbgegeben>0) {tmpobj.status=202;bestellungAbgegeben--;} else tmpobj.status=201;
             		}
             }
             
@@ -1566,12 +1566,12 @@ public class Board extends JPanel
             //Essen des Gerichts
             if(tmpobj.status==4 && tmpobj.posX==tmpobj.homeX && tmpobj.posY==tmpobj.homeY)
             {
-            	tmpobj.Laune+=4;
+            	tmpobj.Laune+=3;
             	if(tmpobj.Hunger>0)
             		tmpobj.Hunger--;
             	else 
             		{
-            			tmpobj.status=5;
+            			if(tmpobj.posX==tmpobj.homeX && tmpobj.posY==tmpobj.homeY) tmpobj.status=5;
             		}
             }
             
@@ -1600,16 +1600,23 @@ public class Board extends JPanel
             }
             
             //Laune verändern
-            if(tmpobj.typ==0 && tmpobj.Laune>0 && tmpobj.status!=1000 && tmpobj.status!=1001 && tmpobj.status!=99 && tmpobj.status!=6)
+            if(tmpobj.typ==0 && tmpobj.Laune>0 && tmpobj.status!=1000 && tmpobj.status!=1001 && tmpobj.status!=99 && tmpobj.status!=4 && tmpobj.status!=6)
             {
             	tmpobj.Laune--;
             }
+            
+			//Richtung Stuhl ausrichten
+			if(blockGrid[tmpobj.posX/32][tmpobj.posY/32]==7) tmpobj.direction=2;
+			if(blockGrid[tmpobj.posX/32][tmpobj.posY/32]==8) tmpobj.direction=3;
+			if(blockGrid[tmpobj.posX/32][tmpobj.posY/32]==9) tmpobj.direction=0;
+			if(blockGrid[tmpobj.posX/32][tmpobj.posY/32]==10) tmpobj.direction=1;
                         
             //Verlässt empört das Restaurant
-            if(tmpobj.Laune<50 && tmpobj.status!=1001)
+            if(tmpobj.Laune<50 && tmpobj.status!=1001 && tmpobj.Harndrang<450)
             {
             	tmpobj.zielX=224;
             	tmpobj.zielY=448;
+            	if(tmpobj.status==3) essenZubereitet--;
             	tmpobj.status=99;
             	besetztGrid[tmpobj.homeX/32][tmpobj.homeY/32]=0;
             	tmpobj.homeX=224;
@@ -1621,21 +1628,31 @@ public class Board extends JPanel
 				//lPerson.remove(tmpobj.nr);
 				System.out.println("[Ruf subtrahieren von " +tmpobj.nr+ " mit Status " +tmpobj.status);
 				tmpobj.status=1001;
-				besetztGrid[tmpobj.posX][tmpobj.posY]=0;
+				
+				besetztGrid[tmpobj.posX/32][tmpobj.posY/32]=0;
 				tmpobj.homeX=0;
 				tmpobj.homeY=0;
+				if(schlange>0) tmpEinlass=10000;
 				ruf=ruf/2;
 				System.out.println("[Ruf subtrahiert, Status auf " +tmpobj.status+ " geändert]");
 			}
 			if(tmpobj.status==6 && tmpobj.posX==tmpobj.zielX && tmpobj.posY==tmpobj.zielY)
 			{
+				System.out.println("[ Gast verabschiedet ]" );
 				tmpobj.status=1000;
 				tmpobj.homeX=0;
 				tmpobj.homeY=0;
-				besetztGrid[tmpobj.posX][tmpobj.posY]=0;
 				
-				if(tmpobj.Laune<500) ruf+=10; else {
+				besetztGrid[tmpobj.posX/32][tmpobj.posY/32]=0;
+				if(schlange>0) tmpEinlass=10000;
+				if(tmpobj.Laune<500) 
+					{
+						ruf+=10;
+						System.out.println("[ Ruf um 10 erhoeht ]" );
+					}	
+						else {
 					ruf+=25; 
+					System.out.println("[ Ruf um 25 erhoeht ]" );
 					finanzen+=(int) (Math.random() * 10);
 					};
 
@@ -1658,15 +1675,20 @@ public class Board extends JPanel
     			tmpobj.zielX=tmpobj.homeX;
     			tmpobj.zielY=tmpobj.homeY;
 			}
-			System.out.println("tmpTimer:  " + tmpTimer + " time " + time);
 			
 			//Einnahmen / Ausgaben zeichnen
 			if(tmpTimer>time)
 			{
 		      
-				System.out.println("[Zeichne Wert bei " + tmpTimerPosX + "," +(tmpTimerPosY+offset)+ "]");
-		      if(tmpWert>=0) g2d.setColor(Color.green);else g2d.setColor(Color.red);
-		      if(offset%3==0)g2d.drawString(""+tmpWert+"€", tmpTimerPosX,(tmpTimerPosY-offset));
+				g2d.setFont(new Font("TimesRoman", Font.PLAIN, 20));
+		      
+		      if(offset%3==0)
+		    	  {
+		    	  	g2d.setColor(Color.black);
+		    	  	g2d.drawString(""+tmpWert+"€", tmpTimerPosX+1,(tmpTimerPosY-offset+1));
+		    	  	if(tmpWert>=0) g2d.setColor(Color.green);else g2d.setColor(Color.red);	
+		    	  	g2d.drawString(""+tmpWert+"€", tmpTimerPosX,(tmpTimerPosY-offset));
+		    	  }
 		      offset++;
 			} else 
 			{
@@ -1683,11 +1705,12 @@ public class Board extends JPanel
     		tmpEinlass+=ruf;
     	} else 
     	{
-    		if(schlange==0) gastEinlassen.doClick();
-    		for(int i=0;i<schlange;i++) {gastEinlassen.doClick(); if(schlange>0)schlange--;}
+    		gastEinlassen.doClick();
     		tmpEinlass=0;
     	}
     	System.out.println("[Gast Spawner :" +tmpEinlass+ "," +ruf+ "]");
+    	
+    	
         
         //CURSOR ZEICHNEN
         //auswahl gast        
